@@ -57,7 +57,7 @@ def _class_label(i: int) -> str:
 
 
 def _load(db_path: Path) -> tuple[list[dict], dict, list[dict], dict]:
-    con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    con = sqlite3.connect(Path(db_path).resolve().as_uri() + "?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
     rows = [dict(r) for r in con.execute("SELECT * FROM v_industrieanteil ORDER BY ars")]
     ind = dict(con.execute("SELECT * FROM indicator WHERE indicator_id = 'industrieanteil'").fetchone())

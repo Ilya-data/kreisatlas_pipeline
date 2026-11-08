@@ -79,7 +79,7 @@ def decode_gpkg_geometry(blob: bytes) -> tuple[int, MultiPolygon]:
 
 
 def read_districts(gpkg: Path | str, ars_prefix: str = "") -> list[District]:
-    con = sqlite3.connect(f"file:{gpkg}?mode=ro", uri=True)
+    con = sqlite3.connect(Path(gpkg).resolve().as_uri() + "?mode=ro", uri=True)
     try:
         rows = con.execute(
             "SELECT ARS, GEN, BEZ, geom FROM vg2500_krs WHERE GF = 9 AND ARS LIKE ? ORDER BY ARS",

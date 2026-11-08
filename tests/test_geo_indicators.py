@@ -56,3 +56,11 @@ def test_manipulierte_rohdatei_wird_erkannt(tmp_path, monkeypatch):
         f.write(b"\n")
     with pytest.raises(ValueError, match="Prüfsumme"):
         raw.verify_manifest()
+
+
+def test_pfad_mit_leerzeichen(tmp_path):
+    # Windows-Pfade enthalten oft Leerzeichen; SQLite bekommt eine korrekt kodierte URI
+    d = tmp_path / "Mein Ordner #1"
+    d.mkdir()
+    shutil.copy(config.GEO_FILE, d / "vg.gpkg")
+    assert len(geo.read_districts(d / "vg.gpkg", "12")) == 18

@@ -149,7 +149,7 @@ Der Befund zur letzten Zeile: In Potsdam und Spree-Neiße liegt „Insgesamt“ 
 data/raw/            Rohdateien + MANIFEST.json (Prüfsummen) + Nutzungsbedingungen BKG
 sources.json         Quellenkatalog (URL, Lizenz, Quellenvermerk, Rhythmus)
 src/atlas/           Pipeline-Module
-tests/               17 Tests (Parser, Schemaänderung, Prüfregeln, Geometrie, Prüfsummen)
+tests/               18 Tests (Parser, Schemaänderung, Prüfregeln, Geometrie, Prüfsummen, Windows-Pfade)
 out/                 Datenbank, GeoJSON, Karte, Prüfbericht
 .github/workflows/   Tests, Pipeline, Veröffentlichung auf GitHub Pages
 ```

@@ -1,0 +1,4 @@
+# Rohdaten byte-genau halten: keine Umwandlung der Zeilenenden (sonst passt die SHA-256-Prüfsumme nicht, z. B. unter Windows)
+data/raw/** binary
+*.sqlite binary
+*.gpkg binary
