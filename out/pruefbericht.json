@@ -1,0 +1,90 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "rule": "vollstaendigkeit",
+      "level": "error",
+      "description": "Jede Region hat jeden Wirtschaftszweig in allen 6 Spalten; Kreise = erwartete Liste",
+      "checked": 1596,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    },
+    {
+      "rule": "geo_abgleich",
+      "level": "error",
+      "description": "Jeder Kreis der Statistik hat eine Geometrie und umgekehrt",
+      "checked": 18,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    },
+    {
+      "rule": "maennlich_plus_weiblich",
+      "level": "error",
+      "description": "männlich + weiblich = insgesamt",
+      "checked": 526,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    },
+    {
+      "rule": "auslaendisch_le_insgesamt",
+      "level": "error",
+      "description": "ausländisch ≤ insgesamt",
+      "checked": 753,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    },
+    {
+      "rule": "wz_hierarchie",
+      "level": "error",
+      "description": "B-F und G-U = Summe ihrer Bestandteile; Summe A + B-F + G-U ≤ Insgesamt; C ≤ B-E",
+      "checked": 456,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    },
+    {
+      "rule": "ohne_wz_zuordnung",
+      "level": "warning",
+      "description": "Insgesamt − (A + B-F + G-U) = Beschäftigte ohne Zuordnung zu einem Wirtschaftszweig (Hinweis, kein Fehler)",
+      "checked": 19,
+      "failed": 3,
+      "examples": [
+        "12: 2 ohne Zuordnung",
+        "12054: 1 ohne Zuordnung",
+        "12071: 1 ohne Zuordnung"
+      ],
+      "ok": false
+    },
+    {
+      "rule": "summe_kreise_gleich_land",
+      "level": "error",
+      "description": "Summe der Kreise = Landeswert (bei geheimen Werten: Summe ≤ Land)",
+      "checked": 84,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    },
+    {
+      "rule": "anteil_geheim",
+      "level": "warning",
+      "description": "Anteil geheimer Werte ≤ 10%",
+      "checked": 1596,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    },
+    {
+      "rule": "wertebereich_indikatoren",
+      "level": "error",
+      "description": "Anzahlen ≥ 0, Anteile zwischen 0 und 100 %",
+      "checked": 57,
+      "failed": 0,
+      "examples": [],
+      "ok": true
+    }
+  ]
+}

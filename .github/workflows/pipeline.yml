@@ -1,0 +1,81 @@
+name: Atlas-Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # wöchentlich montags 05:17 UTC; rechnet nur neu, wenn sich Rohdaten geändert haben
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas-pipeline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Testwerkzeug installieren (die Pipeline selbst braucht nur die Standardbibliothek)
+        run: pip install "pytest>=8"
+
+      - name: Tests (Parser, Prüfregeln, Geometrie, Prüfsummen)
+        run: python -m pytest -q
+
+      - name: Pipeline ausführen
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python -m atlas.pipeline          # überspringt, wenn Rohdaten unverändert
+          else
+            python -m atlas.pipeline --force  # Code geändert: immer neu rechnen
+          fi
+
+      - name: Prüfbericht in die Zusammenfassung
+        if: always()
+        run: |
+          echo "### Prüfbericht" >> "$GITHUB_STEP_SUMMARY"
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("out/pruefbericht.json")
+          if p.exists():
+              r = json.loads(p.read_text(encoding="utf-8"))
+              print("| Regel | Stufe | geprüft | auffällig |\n|---|---|---|---|")
+              for c in r["checks"]:
+                  print(f"| {c['rule']} | {'OK' if c['ok'] else c['level']} | {c['checked']} | {c['failed']} |")
+          EOF
+
+      - name: Seite für GitHub Pages zusammenstellen
+        run: |
+          mkdir -p site
+          cp out/karte.html site/index.html
+          cp out/kreise_industrieanteil.geojson out/pruefbericht.json site/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

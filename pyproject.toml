@@ -1,0 +1,13 @@
+[project]
+name = "kreisatlas-pipeline"
+version = "0.1.0"
+description = "Prototyp einer Atlas-Pipeline: offene Regionalstatistik → geprüftes Datenmodell → Kreiskarte"
+requires-python = ">=3.10"
+dependencies = []  # bewusst nur Standardbibliothek
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

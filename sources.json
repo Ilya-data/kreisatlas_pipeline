@@ -1,0 +1,28 @@
+{
+  "sources": [
+    {
+      "source_id": "regio_13111-07-05-4",
+      "name": "Regionalstatistik 13111-07-05-4: Sozialversicherungspflichtig Beschäftigte am Arbeitsort nach Geschlecht, Nationalität und Wirtschaftszweigen, Kreise und kreisfreie Städte, Stichtag 30.06.",
+      "publisher": "Statistische Ämter des Bundes und der Länder",
+      "url": "https://www.regionalstatistik.de/genesis/online?operation=table&code=13111-07-05-4",
+      "license": "dl-de/by-2-0",
+      "attribution": "© Statistische Ämter des Bundes und der Länder, Deutschland, 2026. Datenlizenz Deutschland – Namensnennung – Version 2.0. Eigene Berechnungen.",
+      "update_cycle": "jährlich (Stichtag 30.06.)",
+      "file": "data/raw/13111-07-05-4.csv",
+      "retrieved_at": "2026-11-07T23:21:56+01:00",
+      "retrieval": "manueller CSV-Download (Flat-File folgt mit API-Abruf)"
+    },
+    {
+      "source_id": "bkg_vg2500",
+      "name": "Verwaltungsgebiete 1:2 500 000 (VG2500), Stand 31.12.2025, UTM32 (EPSG:25832), GeoPackage",
+      "publisher": "Bundesamt für Kartographie und Geodäsie (BKG)",
+      "url": "https://gdz.bkg.bund.de/index.php/default/digitale-geodaten/verwaltungsgebiete/verwaltungsgebiete-1-2-500-000-stand-31-12-vg2500-12-31.html",
+      "license": "dl-de/by-2-0",
+      "attribution": "© GeoBasis-DE / BKG (2025), dl-de/by-2-0, Daten verändert (Ausschnitt Brandenburg, Koordinaten umgerechnet)",
+      "update_cycle": "jährlich (Stand 31.12.)",
+      "file": "data/raw/DE_VG2500.gpkg",
+      "retrieved_at": "2026-11-08T12:34:00+01:00",
+      "retrieval": "manueller Direktdownload"
+    }
+  ]
+}

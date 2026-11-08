@@ -1,0 +1,18 @@
+{
+  "files": [
+    {
+      "source_id": "regio_13111-07-05-4",
+      "file": "data/raw/13111-07-05-4.csv",
+      "bytes": 31215,
+      "sha256": "ec0fc19c0d81790930260053ef7252d39c8ec9107a84844f3b66eb7ff95007d8",
+      "retrieved_at": "2026-11-07T23:21:56+01:00"
+    },
+    {
+      "source_id": "bkg_vg2500",
+      "file": "data/raw/DE_VG2500.gpkg",
+      "bytes": 3297280,
+      "sha256": "9cdbf4496c3ec3437e4d944e79ca059352e98b57048c9850494e4c8ba4287ca2",
+      "retrieved_at": "2026-11-08T12:34:00+01:00"
+    }
+  ]
+}
