@@ -62,7 +62,7 @@ jobs:
           cp out/karte.html site/index.html
           cp out/kreise_industrieanteil.geojson out/pruefbericht.json site/
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
