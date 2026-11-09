@@ -49,7 +49,7 @@
     {
       "rule": "ohne_wz_zuordnung",
       "level": "warning",
-      "description": "Insgesamt − (A + B-F + G-U) = Beschäftigte ohne Zuordnung zu einem Wirtschaftszweig (Hinweis, kein Fehler)",
+      "description": "Insgesamt − (A + B-F + G-U) = Beschäftigte ohne Zuordnung zu einem Wirtschaftszweig (Warnung, kein Fehler)",
       "checked": 19,
       "failed": 3,
       "examples": [

@@ -107,11 +107,11 @@ Werte und Karte sind eigene Berechnungen. Die Quellenvermerke stehen auch in Kar
 | Summe der 18 Kreise = Land | Fehler | 84, 0 |
 | Wertebereich der Indikatoren | Fehler | 57, 0 |
 | Anteil geheimer Werte ≤ 10 % | Warnung | 2,8 % |
-| Beschäftigte ohne Wirtschaftszweig | Hinweis | 3 Fälle |
+| Beschäftigte ohne Wirtschaftszweig | Warnung | 3 Fälle |
 
 Bei geheimen Werten prüfen die Regeln nur die abgeschwächte Ungleichung (bekannte Teile ≤ Summe). Unterdrückte Werte werden nie über Differenzen zurückgerechnet.
 
-Der Befund zur letzten Zeile: In Potsdam und Spree-Neiße liegt „Insgesamt“ um je eine Person über der Summe der Wirtschaftszweige, im Land um zwei. Das sind Beschäftigte ohne Zuordnung zu einem Wirtschaftszweig. Eine erste, strengere Regel (Summe = Insgesamt) hat das aufgedeckt. Sie wurde daraufhin bewusst zu „≤“ plus Hinweis geändert.
+Der Befund zur letzten Zeile: In Potsdam und Spree-Neiße liegt „Insgesamt“ um je eine Person über der Summe der Wirtschaftszweige, im Land um zwei. Das sind Beschäftigte ohne Zuordnung zu einem Wirtschaftszweig. Eine erste, strengere Regel (Summe = Insgesamt) hat das aufgedeckt. Sie wurde daraufhin bewusst zu „≤“ plus Warnung geändert.
 
 ## Indikator und Grenzen
 
@@ -138,7 +138,7 @@ Der Befund zur letzten Zeile: In Potsdam und Spree-Neiße liegt „Insgesamt“ 
 ## Nächste Schritte
 
 1. **API-Abruf:** GENESIS-REST der Regionalstatistik mit Zugangsdaten aus GitHub Secrets (Endpunkt und Flat-File-Format sind noch gegen die aktuelle API-Dokumentation zu prüfen). Jeder Abruf schreibt eine neue Rohdatei plus Manifest-Eintrag. Der wöchentliche Lauf rechnet dann wirklich nur bei neuen Daten.
-2. **Ganz Deutschland:** `LAND_PREFIX = ""` setzen. Parser und Prüfregeln sind dafür ausgelegt, Prüfregel „Kreise = Land“ wird zu „Kreise = Land = Bund“ erweitert.
+2. **Ganz Deutschland:** Tabelle für alle Kreise abrufen (die Rohdatei enthält bisher nur Brandenburg) und `LAND_PREFIX = ""` setzen. Parser und Prüfregeln sind dafür ausgelegt; Prüfregel „Kreise = Land“ wird zu „Kreise = Land = Bund“ erweitert, und das Laden braucht dann eine Bundesebene über den Ländern. Die Karte nimmt Gebiet, Namen und Anzahl aus der Datenbank; Beschriftungsversätze und der Berlin-Hinweis sind für Brandenburg von Hand gesetzt.
 3. **Zweiter Indikator**, z. B. Anteil mit akademischem Abschluss aus 13111-11-04-4-B, als Nachweis, dass das Modell mehrere Indikatoren trägt.
 4. **Überwachung:** Alarm bei Fehlschlag oder auffälligen Veränderungen zum Vorjahr; Zuständigkeit festlegen.
 5. **Dokumentation:** Methodik- und Indikatorseiten, Änderungsprotokoll.
@@ -149,7 +149,7 @@ Der Befund zur letzten Zeile: In Potsdam und Spree-Neiße liegt „Insgesamt“ 
 data/raw/            Rohdateien + MANIFEST.json (Prüfsummen) + Nutzungsbedingungen BKG
 sources.json         Quellenkatalog (URL, Lizenz, Quellenvermerk, Rhythmus)
 src/atlas/           Pipeline-Module
-tests/               18 Tests (Parser, Schemaänderung, Prüfregeln, Geometrie, Prüfsummen, Windows-Pfade)
+tests/               20 Tests (Parser, Schemaänderung, Prüfregeln, Geometrie, Prüfsummen, Windows-Pfade, Karte)
 out/                 Datenbank, GeoJSON, Karte, Prüfbericht
 .github/workflows/   Tests, Pipeline, Veröffentlichung auf GitHub Pages
 ```

@@ -23,10 +23,14 @@ CITY_LABEL_OFFSET = {
     "12054": (-34, -26),  # Potsdam
 }
 # Feinkorrektur für Innenbeschriftungen in schmalen Flächen (Pixel)
-LABEL_NUDGE = {"12066": (1, -14), "12071": (-12, 4)}  # Oberspreewald-Lausitz, Spree-Neiße
+LABEL_NUDGE = {"12066": (6, -58), "12071": (-12, 4)}  # Oberspreewald-Lausitz, Spree-Neiße
 # Zeilenumbruch von Hand, wo die Fläche für zwei Zeilen zu schmal ist
-LABEL_LINES = {"12066": ["Ober-", "spreewald-", "Lausitz"]}
+LABEL_LINES = {"12066": ["Ober-", "spree-", "wald-", "Lausitz"]}
+# Etwas kleinere Schrift, wo der Kreis eine schmale Stelle hat (px; Standard 10,5)
+LABEL_SIZE = {"12066": 9.5}
 SHORT_NAMES = {"Brandenburg an der Havel": "Brandenburg a. d. Havel"}
+# Regionen, die als Loch im Land liegen, aber nicht Teil der Tabelle sind: Land → (ARS, Name)
+HOLES = {"12": ("11", "Berlin")}
 
 # 5 Klassen mit runden Grenzen (Prozent). Untergrenze inklusiv.
 BREAKS = [0, 5, 10, 15, 20]
@@ -108,9 +112,10 @@ def write_geojson(db_path: Path, out: Path) -> None:
     out.write_text(json.dumps(fc, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
-def _svg_map(rows: list[dict], gpkg: Path, width: int = 560) -> tuple[str, int]:
+def _svg_map(rows: list[dict], gpkg: Path, land: dict, width: int = 560) -> tuple[str, int]:
     by_ars = {r["ars"]: r for r in rows}
-    districts = [d for d in read_districts(gpkg, "12") if d.ars in by_ars]
+    # Gezeichnet wird genau, was in der Datenbank steht (kein fest eingebautes Land)
+    districts = [d for d in read_districts(gpkg, land["ars"]) if d.ars in by_ars]
     xs = [x for d in districts for p in d.geometry for ring in p for x, _ in ring]
     ys = [y for d in districts for p in d.geometry for ring in p for _, y in ring]
     pad, pad_right = 8, 72  # rechts Platz für Städtenamen an der Landesgrenze
@@ -160,18 +165,24 @@ def _svg_map(rows: list[dict], gpkg: Path, width: int = 560) -> tuple[str, int]:
             f'<tspan x="{x:.1f}" dy="{(-0.55 * (len(parts) - 1) if k == 0 else 1.1):.2f}em">{html.escape(part)}</tspan>'
             for k, part in enumerate(parts)
         )
-        labels.append(f'<text class="lbl{hi}" x="{x:.1f}" y="{y:.1f}" data-ars="{d.ars}">{tspans}</text>')
-    # Berlin liegt als Loch in der Mitte – ohne Hinweis wirkt es wie fehlende Daten
-    berlin = read_districts(gpkg, "11")
-    bx, by = (float(v) for v in pt(*inner_point(berlin[0].geometry)).split(",")) if berlin else (-100.0, -100.0)
+        size = f' style="font-size:{LABEL_SIZE[d.ars]}px"' if d.ars in LABEL_SIZE else ""
+        labels.append(f'<text class="lbl{hi}" x="{x:.1f}" y="{y:.1f}"{size} data-ars="{d.ars}">{tspans}</text>')
+    # Berlin liegt als Loch in Brandenburg – ohne Hinweis wirkt es wie fehlende Daten
+    hole_label = ""
+    if land["ars"] in HOLES:
+        hole_ars, hole_name = HOLES[land["ars"]]
+        hole = read_districts(gpkg, hole_ars)
+        if hole:
+            bx, by = (float(v) for v in pt(*inner_point(hole[0].geometry)).split(","))
+            hole_label = f'<text class="lbl-berlin" x="{bx:.1f}" y="{by:.1f}">{html.escape(hole_name)}</text>'
     svg = (
-        f'<svg class="map" viewBox="0 0 {width} {height}" role="group" aria-label="Karte der Kreise Brandenburgs">'
+        f'<svg class="map" viewBox="0 0 {width} {height}" role="group" aria-label="Karte der Kreise: {html.escape(land['name'])}">'
         '<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
         '<line x1="0" y1="0" x2="0" y2="6" stroke="var(--text-muted)" stroke-width="1.5"/></pattern></defs>'
         + "".join(paths)
         + '<g class="labels" aria-hidden="true">'
         + "".join(labels)
-        + f'<text class="lbl-berlin" x="{bx:.1f}" y="{by:.1f}">Berlin</text>'
+        + hole_label
         + "</g></svg>"
     )
     return svg, height
@@ -179,11 +190,12 @@ def _svg_map(rows: list[dict], gpkg: Path, width: int = 560) -> tuple[str, int]:
 
 def _bars(rows: list[dict], land: dict) -> str:
     kreise = sorted((r for r in rows if r["geometry"] is not None), key=lambda r: -(r["anteil_prozent"] or -1))
-    vmax = 30.0
+    top = max((r["anteil_prozent"] or 0) for r in kreise)
+    vmax = max(30.0, 10.0 * -(-top // 10))  # Achse bis 30 %, bei höheren Werten bis zum nächsten Zehner
     w_label, w_plot, row_h = 168, 200, 22
     h = row_h * len(kreise) + 28
     out = [f'<svg class="bars" viewBox="0 0 {w_label + w_plot + 56} {h}" role="img" aria-label="Rangliste Industrieanteil je Kreis">']
-    for t in range(0, 31, 10):
+    for t in range(0, int(vmax) + 1, 10):
         x = w_label + w_plot * t / vmax
         out.append(f'<line class="grid" x1="{x:.1f}" x2="{x:.1f}" y1="0" y2="{h - 22}"/>')
         out.append(f'<text class="tick" x="{x:.1f}" y="{h - 8}">{t} %</text>')
@@ -213,14 +225,15 @@ def write_map(db_path: Path, gpkg: Path, out: Path) -> None:
     lo = min(valid, key=lambda r: r["anteil_prozent"])
     hi = max(valid, key=lambda r: r["anteil_prozent"])
     n_secret = len(kreise) - len(valid)
-    svg_map, _ = _svg_map(rows, gpkg)
+    svg_map, _ = _svg_map(rows, gpkg, land)
     bars = _bars(rows, land)
     counts = [sum(1 for r in valid if _class_of(r["anteil_prozent"]) == i) for i in range(len(BREAKS))]
     legend = "".join(
         f'<li><span class="sw" style="background:var(--c{i})"></span>{_class_label(i)} <span class="cnt">({c})</span></li>'
         for i, c in enumerate(counts)
     )
-    legend += '<li class="muted">Berlin (weiß): nicht Teil der Tabelle</li>'
+    if land["ars"] in HOLES:
+        legend += f'<li class="muted">{html.escape(HOLES[land["ars"]][1])} (weiß): nicht Teil der Tabelle</li>'
     if n_secret:
         legend += f'<li><span class="sw hatch"></span>geheim <span class="cnt">({n_secret})</span></li>'
     ranked = sorted(valid, key=lambda r: -r["anteil_prozent"])
@@ -263,7 +276,7 @@ def write_map(db_path: Path, gpkg: Path, out: Path) -> None:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Industrieanteil je Kreis – Brandenburg {stichtag}</title>
+<title>Industrieanteil je Kreis – {html.escape(land['name'])} {stichtag}</title>
 <style>
 .viz-root {{
   color-scheme: light;
@@ -344,7 +357,7 @@ a {{ color:inherit; }}
 </head>
 <body>
 <div class="viz-root">
-<h1>Industrieanteil der Beschäftigung je Kreis, Brandenburg, {stichtag}</h1>
+<h1>Industrieanteil der Beschäftigung je Kreis, {html.escape(land['name'])}, {stichtag}</h1>
 <p class="lead">Anteil der sozialversicherungspflichtig Beschäftigten im Verarbeitenden Gewerbe an allen Beschäftigten am Arbeitsort.
 Er reicht von {_fmt_pct(lo['anteil_prozent'])} in {html.escape(lo['name'])} bis {_fmt_pct(hi['anteil_prozent'])} in {html.escape(hi['name'])}; im Land sind es {_fmt_pct(land['anteil_prozent'])}.</p>
 <div class="grid2">
@@ -354,7 +367,7 @@ Er reicht von {_fmt_pct(lo['anteil_prozent'])} in {html.escape(lo['name'])} bis 
     <ul class="legend" aria-label="Legende">{legend}</ul>
   </section>
   <section>
-    <h2>Rangfolge der 18 Kreise und kreisfreien Städte</h2>
+    <h2>Rangfolge der {len(kreise)} Kreise und kreisfreien Städte</h2>
     {bars}
   </section>
 </div>
@@ -386,7 +399,7 @@ function show(ars, ev) {{
   map.classList.add('has-hover'); bars.classList.add('has-hover');
   document.querySelectorAll('[data-ars]').forEach(el => el.classList.toggle('on', el.dataset.ars === ars));
   const diff = d.anteil - LAND;
-  tip.innerHTML = `<b>${{d.name}}</b><div class="muted">${{d.bez}} · Rang ${{d.rang}} von 18</div>`
+  tip.innerHTML = `<b>${{d.name}}</b><div class="muted">${{d.bez}} · Rang ${{d.rang}} von {len(kreise)}</div>`
     + `<div class="big">${{fmtPct(d.anteil)}}</div>`
     + `<div class="row"><span>${{diff >= 0 ? '+' : '−'}}${{Math.abs(diff).toFixed(1).replace('.', ',')}} Pp. zum Land</span></div>`
     + `<div class="row"><span>Verarb. Gewerbe</span><span>${{fmtInt(d.zaehler)}}</span></div>`
