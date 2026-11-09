@@ -129,7 +129,7 @@ def check_unassigned(obs: list[Observation]) -> Check:
     c = Check(
         "ohne_wz_zuordnung",
         "warning",
-        "Insgesamt − (A + B-F + G-U) = Beschäftigte ohne Zuordnung zu einem Wirtschaftszweig (Hinweis, kein Fehler)",
+        "Insgesamt − (A + B-F + G-U) = Beschäftigte ohne Zuordnung zu einem Wirtschaftszweig (Warnung, kein Fehler)",
     )
     idx = _index(obs)
     for ars in sorted({o.ars for o in obs}):
