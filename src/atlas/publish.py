@@ -23,9 +23,11 @@ CITY_LABEL_OFFSET = {
     "12054": (-34, -26),  # Potsdam
 }
 # Feinkorrektur für Innenbeschriftungen in schmalen Flächen (Pixel)
-LABEL_NUDGE = {"12066": (1, -14), "12071": (-12, 4)}  # Oberspreewald-Lausitz, Spree-Neiße
+LABEL_NUDGE = {"12066": (6, -58), "12071": (-12, 4)}  # Oberspreewald-Lausitz, Spree-Neiße
 # Zeilenumbruch von Hand, wo die Fläche für zwei Zeilen zu schmal ist
-LABEL_LINES = {"12066": ["Ober-", "spreewald-", "Lausitz"]}
+LABEL_LINES = {"12066": ["Ober-", "spree-", "wald-", "Lausitz"]}
+# Etwas kleinere Schrift, wo der Kreis eine schmale Stelle hat (px; Standard 10,5)
+LABEL_SIZE = {"12066": 9.5}
 SHORT_NAMES = {"Brandenburg an der Havel": "Brandenburg a. d. Havel"}
 # Regionen, die als Loch im Land liegen, aber nicht Teil der Tabelle sind: Land → (ARS, Name)
 HOLES = {"12": ("11", "Berlin")}
@@ -163,7 +165,8 @@ def _svg_map(rows: list[dict], gpkg: Path, land: dict, width: int = 560) -> tupl
             f'<tspan x="{x:.1f}" dy="{(-0.55 * (len(parts) - 1) if k == 0 else 1.1):.2f}em">{html.escape(part)}</tspan>'
             for k, part in enumerate(parts)
         )
-        labels.append(f'<text class="lbl{hi}" x="{x:.1f}" y="{y:.1f}" data-ars="{d.ars}">{tspans}</text>')
+        size = f' style="font-size:{LABEL_SIZE[d.ars]}px"' if d.ars in LABEL_SIZE else ""
+        labels.append(f'<text class="lbl{hi}" x="{x:.1f}" y="{y:.1f}"{size} data-ars="{d.ars}">{tspans}</text>')
     # Berlin liegt als Loch in Brandenburg – ohne Hinweis wirkt es wie fehlende Daten
     hole_label = ""
     if land["ars"] in HOLES:
